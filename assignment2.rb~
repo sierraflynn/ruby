@@ -83,44 +83,36 @@ if goodJB.delicious?
 end
 #----------------------------------------------------------------------
 #2. The Class class provides a method, attr_accessor, which uses metaprogramming to create getters and setters for object attributes on the fly. Define a method attr_accessor_with_history that provides the same functionality as attr_accessor but also tracks every value the attribute has ever taken. The following example shows the basic behavior of the new accessor:
-class Class #*****
+class Class
     def attr_accessor_with_history(attr_name)
         attr_name = attr_name.to_s       # make sure it's a string
-        attr_reader attr_name            
-# create the attribute's getter
+        attr_reader attr_name            # create the attrs getter
         attr_reader attr_name+"_history" # create bar_history getter
-        class_eval "your code here, use %Q for multiline strings"
+        class_eval %Q{
+           		def #{attr_name}=(new_val)
+           		   if (!defined? @#{attr_name})
+		              @#{attr_name}_history = [nil]
+           		   end
+           	        @#{attr_name}_history.push(new_val)
+          		@#{attr_name} = new_val
+                        end
+        }
+    #passing code as a string to the function class_eval
     end
 end
 
 class Foo
-    def initialize
-        @bar=nil
-        @bar_history = [@bar]
-    end
-    def bar
-        @bar
-    end
-    def bar=(new_bar)
-        @bar=new_bar
-        #append to history array
-        @bar_history=@bar_history << new_bar
-        return @bar
-    end
-    def bar_history
-        @bar_history
-    end
-    #attr_accessor_with_history :bar ***********
+    attr_accessor_with_history :bar
 end
 
 f = Foo.new     # => #<Foo:0x127e678>
-puts f
+p f
 f.bar = 3       # => 3
-puts f.bar
+p f.bar
 f.bar = :wowzo  # => :wowzo
-puts f.bar
+p f.bar
 f.bar = 'boo!'  # => 'boo!'
-puts f.bar
+p f.bar
 f.bar_history   # => [nil, 3, :wowzo, 'boo!']
 #'p' pretty prints it
 p f.bar_history
@@ -142,27 +134,35 @@ Both the singular and plural forms of each currency should be acceptable, e.g. 1
 =end
 
 class Numeric
- @@currencies = {'yen' => 0.013, 'euro' => 1.292, 'rupee' => 0.019}
+ #@@ is a class variable, added to Numeric class
+ @@currencies = {'yen' => 0.013, 'euro' => 1.292, 'rupee' => 0.019, 'dollar' => 1.0}
+ #check if plural
  def method_missing(method_id)
    singular_currency = method_id.to_s.gsub( /s$/, '')
+   #if self =~ /\d+\.dollar\s?/
    if @@currencies.has_key?(singular_currency)
      self * @@currencies[singular_currency]
    else
-     super
+     super #if method not defined, push up to a higher class
    end
  end
- def in(type)
-    if type == :euro
-      self*@@currencies['euro']
-    elif type == :yen
-      self*@@currencies['yen']
-    elif type == :rupee
-      self*@@currencies['rupee']
-    else
-      method_missing(type)
-    end
+ #define class method 'in' on symbol 'cur'
+ #left side of n is always in dollars
+ def in(cur)
+   cur = cur.to_s.gsub( /s$/, '')
+ # :a is a symbol, convert to string 'a'
+   if @@currencies.has_key?(cur)
+     self/@@currencies[cur]
+   end
  end
 end
+
+p 5.euro # 6.46 (in dollars)
+p (5.euro).in(:euro) 
+# 5 : converts from 5 euros to 6.46 dollars to 5 euros
+p 1.dollar.in(:rupees) # => 1/.019 = 52.63
+p 10.euros.in(:dollars)
+p 10.rupees.in(:euro)
 #--------------------------------------------------------------------
 #3b) — Palindromes: Adapt your solution from the "palindromes" question so that instead of writing palindrome?("foo") you can write "foo".palindrome? (Hint: this should require fewer than 5 lines of code.)
 #module String
@@ -185,6 +185,7 @@ end
 
 It's not necessary for the collection's elements to be palindromes themselves--only that the top-level collection be a palindrome. (Hint: this should require fewer than 5 lines of code.) Although hashes are considered Enumerables, your solution does not need to work with hashes, though it should not error.]
 =end
+
 module Enumerable
   def palindrome?
     if self == self.reverse
