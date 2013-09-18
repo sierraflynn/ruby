@@ -168,16 +168,14 @@ p 10.rupees.in(:euro)
 #module String
 class String
   def palindrome?
-    fw = self.downcase.reject{|x| x=~ /\w+/} 
+    fw = self.downcase.gsub(/\W+/, '')
     #downcase and eliminate non-words
-    if fw == fw.reverse
-       return true
-    else 
-       return false
-    end
+    return fw == fw.reverse
   end
 end
-#ispal = "A man, a plan, a canal -- Panama".palindrome?
+puts "problem 3b:"
+p "A man, a plan, a canal -- Panama".palindrome?
+p "not a palindrome".palindrome?
 #---------------------------------------------------------------------
 =begin
 [c) — Palindromes again: Adapt your palindrome solution so that it works on Enumerables. That is:
@@ -186,17 +184,17 @@ end
 It's not necessary for the collection's elements to be palindromes themselves--only that the top-level collection be a palindrome. (Hint: this should require fewer than 5 lines of code.) Although hashes are considered Enumerables, your solution does not need to work with hashes, though it should not error.]
 =end
 
-module Enumerable
+module Enumerable #add method palindrome? to already existing class
   def palindrome?
-    if self == self.reverse
-       p true
-       else p false
-    end
+    return self == self.reverse
   end
 end
-[1,2,2,1].palindrome?
-[1,2,3,2,1].palindrome?
-[1,2,3].palindrome?
+puts "Problem 3c: "
+p [1,2,2,1].palindrome?
+p [1,2,3,2,1].palindrome?
+p [1,2,3].palindrome?
+p [[1,2],[3,4],[1,2]].palindrome?
+p [[1,2],[3,4],[2,1]].palindrome?
 #---------------------------------------------------------------------
 #4.
 class CartesianProduct
