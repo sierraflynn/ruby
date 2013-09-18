@@ -86,7 +86,8 @@ end
 class Class #*****
     def attr_accessor_with_history(attr_name)
         attr_name = attr_name.to_s       # make sure it's a string
-        attr_reader attr_name            # create the attribute's getter
+        attr_reader attr_name            
+# create the attribute's getter
         attr_reader attr_name+"_history" # create bar_history getter
         class_eval "your code here, use %Q for multiline strings"
     end
@@ -137,7 +138,7 @@ You should support the currencies dollars, euros, rupees, yen where the conversi
     yen to dollars, multiply by 0.013,
     euro to dollars, multiply by 1.292.
 
-Both the singular and plural forms of each currency should be acceptable, e.g. 1.dollar.in(:rupees) and10.rupees.in(:euro) should work.]
+Both the singular and plural forms of each currency should be acceptable, e.g. 1.dollar.in(:rupees) and 10.rupees.in(:euro) should work.]
 =end
 
 class Numeric
@@ -150,10 +151,66 @@ class Numeric
      super
    end
  end
- def euro
-    self*@@currencies['euro']
- end
- def euros
-    self.euro
+ def in(type)
+    if type == :euro
+      self*@@currencies['euro']
+    elif type == :yen
+      self*@@currencies['yen']
+    elif type == :rupee
+      self*@@currencies['rupee']
+    else
+      method_missing(type)
+    end
  end
 end
+#--------------------------------------------------------------------
+#3b) — Palindromes: Adapt your solution from the "palindromes" question so that instead of writing palindrome?("foo") you can write "foo".palindrome? (Hint: this should require fewer than 5 lines of code.)
+#module String
+class String
+  def palindrome?
+    fw = self.downcase.reject{|x| x=~ /\w+/} 
+    #downcase and eliminate non-words
+    if fw == fw.reverse
+       return true
+    else 
+       return false
+    end
+  end
+end
+#ispal = "A man, a plan, a canal -- Panama".palindrome?
+#---------------------------------------------------------------------
+=begin
+[c) — Palindromes again: Adapt your palindrome solution so that it works on Enumerables. That is:
+[1,2,3,2,1].palindrome? # => true
+
+It's not necessary for the collection's elements to be palindromes themselves--only that the top-level collection be a palindrome. (Hint: this should require fewer than 5 lines of code.) Although hashes are considered Enumerables, your solution does not need to work with hashes, though it should not error.]
+=end
+module Enumerable
+  def palindrome?
+    if self == self.reverse
+       p true
+       else p false
+    end
+  end
+end
+[1,2,2,1].palindrome?
+[1,2,3,2,1].palindrome?
+[1,2,3].palindrome?
+#---------------------------------------------------------------------
+#4.
+class CartesianProduct
+    include Enumerable
+    def initialize(a, b)
+        @a = a
+        @b = b
+        ret = []
+        @a.each do |aa|
+          @b.each do |bb|
+          ret = ret + [aa, bb]
+          end
+       end
+       return ret
+    end
+end
+c = CartesianProduct.new([:a,:b], [4,5])
+c.each { |elt| puts elt.inspect }
