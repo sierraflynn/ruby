@@ -202,14 +202,21 @@ class CartesianProduct
     def initialize(a, b)
         @a = a
         @b = b
-        ret = []
+        @cp = []
         @a.each do |aa|
           @b.each do |bb|
-          ret = ret + [aa, bb]
+          @cp.push([aa, bb])
           end
        end
-       return ret
+    end
+    def each
+       @cp.each do |item|
+          yield item
+       end
     end
 end
-c = CartesianProduct.new([:a,:b], [4,5])
+puts "Problem 4: "
+c = CartesianProduct.new([:a,:b,:c], [1,2])
+c.each { |elt| puts elt.inspect }
+c = CartesianProduct.new([:a,:b], [])
 c.each { |elt| puts elt.inspect }
