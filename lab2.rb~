@@ -55,13 +55,14 @@ class NoSuchStrategyError <  StandardError ; end
 def rps_game_winner(game)
     #raise error if number players != 2
     raise WrongNumberOfPlayersError unless game.length == 2
-    #raise error if plyer uses bad strategy
+    #raise error if player uses bad strategy
     strategy = /^(r|R|s|S|p|P)$/
     raise NoSuchStrategyError unless 
 	game[0][1] =~ strategy && game[1][1] =~ strategy
     #R beats S, S beats P, P beats R
     if game[0][1].downcase == "r"
-         if game[1][1].downcase == "r" || game[1][1].downcase == "s"
+         if game[1][1] =~ /^(r|R|s|S)$/
+         #if game[1][1].downcase == "r" || game[1][1].downcase == "s"
 		winner = game[0][0]
 		winningplay = game[0][1]
 	  else 
@@ -69,7 +70,8 @@ def rps_game_winner(game)
 		winningplay = game[1][1]
           end
     elsif game[0][1].downcase == "s"
-         if game[1][1].downcase == "s" || game[1][1].downcase == "p"
+         if game[1][1] =~ /^(p|P|s|S)$/
+	#if game[1][1].downcase == "s" || game[1][1].downcase == "p"
 		winner = game[0][0]
 		winningplay = game[0][1]
 	  else 
@@ -77,7 +79,8 @@ def rps_game_winner(game)
 		winningplay = game[1][1]
 	  end
     else #if game[0][1] == "P" | "p"
-         if game[1][1].downcase == "p" || game[1][1].downcase == "r"
+          if game[1][1] =~ /^(r|R|p|P)$/
+         #if game[1][1].downcase == "p" || game[1][1].downcase == "r"
 		winner = game[0][0]
 		winningplay = game[0][1]
 	  else 
@@ -123,21 +126,13 @@ def combine_anagrams(words)
     sorted.each do |word| #for each word in the sorted array
         letters = word.split(//).sort #split 1 word into sorted letters
         if hash1[letters].nil? then #check if hash contains letters
-	    hash1[letters] = word #if not, put word in hash
+	    hash1[letters] = [word] #if not, put word in hash
         else
-            hash1[letters] += " " + word 
+            hash1[letters].push(word)
             #if key/anagram already exists, add word to it
         end
     end
-#now we have a hash where each key holds a list of anagrams.
-#Now we want to split it into a multi-dimensional array:
-    arr = Array.new
-    i = 0
-    hash1.keys.each do |list| #for each list of anagrams
-	arr[i] = hash1[list].split(" ") #split up words by spaces
-	i = i+1
-    end
-p arr #pretty-prints the array
+p hash1.values #pretty-prints the anagrams in arrays
 end
 
 combine_anagrams(['cars', 'for', 'potatoes', 'racs', 'four', 'scar', 'creams', 'scream'])
@@ -146,4 +141,5 @@ combine_anagrams(['cars', 'for', 'potatoes', 'racs', 'four', 'scar', 'creams', '
 #           ["for"],
 #           ["potatoes"],
 #           ["creams", "scream"] ]
+
 
